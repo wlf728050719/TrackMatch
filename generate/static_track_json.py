@@ -2,7 +2,7 @@ import argparse
 import json
 import math
 from datetime import datetime, timedelta
-
+from pathlib import Path
 from utils.load_shp import load_node
 
 
@@ -19,7 +19,7 @@ def calculate_heading(lon1, lat1, lon2, lat2):
     return round(angle_deg, 2)
 
 
-def generate_static_track(node_gdf, node_list, output_file):
+def generate_static_track(node_gdf, node_list, output_file=None):
     node_map = {}
     for idx, row in node_gdf.iterrows():
         nid = int(row['node_id']) if not isinstance(row['node_id'], int) else row['node_id']
@@ -35,7 +35,7 @@ def generate_static_track(node_gdf, node_list, output_file):
     # 初始化时间和代理ID
     current_time = datetime.now()
     agent_id = "test"
-    trajectory_data = []
+    track_data = []
 
     # 预计算所有路段的航向
     segment_headings = []
@@ -61,26 +61,37 @@ def generate_static_track(node_gdf, node_list, output_file):
 
             current_heading = segment_headings[-1]
         point = {
+            "node_id": nid,
             "time": time_str,
             "heading": current_heading,
             "agent_id": agent_id,
             "lng": coords['lng'],
             "lat": coords['lat']
         }
-        trajectory_data.append(point)
+        track_data.append(point)
 
-    with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(trajectory_data, f, indent=4, ensure_ascii=False)
-    print(f"Generate Finished: {output_file}")
+    if output_file:
+        output_path = Path(output_file)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(track_data, f, indent=4, ensure_ascii=False)
+        print(f"Generate Finished: {output_file}")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='生成动态轨迹')
-    parser.add_argument('-node_file', type=str, help='node文件路径')
+    return track_data
+
+
+def main():
+    parser = argparse.ArgumentParser(description='生成静态轨迹')
+    parser.add_argument('-node_file', type=str, required=True, help='node文件路径')
     parser.add_argument('-node_pmd', type=str, default='None', help='node处理方法')
-    parser.add_argument('-output_file', type=str, help='输出文件')
+    parser.add_argument('-output_file', type=str, required=True, help='输出文件')
     parser.add_argument('-node_list', type=int, nargs='+', required=True,
                         metavar='ID', help='节点ID列表')
     args = parser.parse_args()
 
     node_gdf = load_node(args.node_file, args.node_pmd)
-    generate_static_track(node_gdf,args.node_list,args.output_file)
+    generate_static_track(node_gdf, args.node_list, args.output_file)
+
+
+if __name__ == "__main__":
+    main()

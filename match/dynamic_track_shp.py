@@ -8,14 +8,15 @@ from gotrackit.MapMatch import MapMatch
 
 from utils.load_shp import load_node, load_link
 
-if __name__ == '__main__':
+
+def main():
     parser = argparse.ArgumentParser(description='动态轨迹匹配')
-    parser.add_argument('-link_file', type=str, help='link文件路径')
-    parser.add_argument('-node_file', type=str, help='node文件路径')
-    parser.add_argument('-track_file', type=str, help='track文件路径')
+    parser.add_argument('-link_file', type=str, required=True, help='link文件路径')
+    parser.add_argument('-node_file', type=str, required=True, help='node文件路径')
+    parser.add_argument('-track_file', type=str, required=True, help='track文件路径')
     parser.add_argument('-link_pmd', type=str, default='None', help='link处理方法')
     parser.add_argument('-node_pmd', type=str, default='None', help='node处理方法')
-    parser.add_argument('-output_fldr', type=str, help='输出目录')
+    parser.add_argument('-output_fldr', type=str, required=True, help='输出目录')
     args = parser.parse_args()
 
     link_gdf = load_link(args.link_file, args.link_pmd)
@@ -42,3 +43,7 @@ if __name__ == '__main__':
     match_res.to_csv(os.path.join(args.output_fldr, 'match_res.csv'), encoding='utf_8_sig', index=False)
     print(warn_info)
     print(error_info)
+
+
+if __name__ == '__main__':
+    main()

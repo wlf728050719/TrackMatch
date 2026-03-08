@@ -4,15 +4,16 @@ from utils.load_shp import load_link, load_node
 from gotrackit.map.Net import Net
 from gotrackit.generation.SampleTrip import TripGeneration
 
-if __name__ == '__main__':
+
+def main():
     parser = argparse.ArgumentParser(description='生成动态轨迹')
-    parser.add_argument('-link_file', type=str, help='link文件路径')
-    parser.add_argument('-node_file', type=str, help='node文件路径')
+    parser.add_argument('-link_file', type=str, required=True, help='link文件路径')
+    parser.add_argument('-node_file', type=str, required=True, help='node文件路径')
     parser.add_argument('-link_pmd', type=str, default='None', help='link处理方法')
     parser.add_argument('-node_pmd', type=str, default='None', help='node处理方法')
-    parser.add_argument('-start_node', type=int, help='开始node')
-    parser.add_argument('-end_node', type=int, help='结束node')
-    parser.add_argument('-output_fldr', type=str, help='输出目录')
+    parser.add_argument('-start_node', type=int, required=True, help='开始node')
+    parser.add_argument('-end_node', type=int, required=True, help='结束node')
+    parser.add_argument('-output_fldr', type=str, required=True, help='输出目录')
     args = parser.parse_args()
 
     link_gdf = load_link(args.link_file, args.link_pmd)
@@ -28,3 +29,6 @@ if __name__ == '__main__':
     ts.generate_od_trips(od_set=od_set, out_fldr=args.output_fldr, time_format="%Y-%m-%d %H:%M:%S.%f",
                          agent_flag='test', instant_output=False, file_type='shp',
                          start_year=2026)
+
+if __name__ == '__main__':
+    main()
